@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "outDir": "./",
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es3",
+    "esModuleInterop": true,
+    "downlevelIteration": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["node_modules"]
+}
