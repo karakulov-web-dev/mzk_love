@@ -1,9 +1,7 @@
 var page = require("webpage").create();
+var config = require("../account.config");
 
-var config = JSON.stringify({
-  login: "oaorikt@gmail.com",
-  password: "4s9db1"
-});
+var configJson = JSON.stringify(config.account);
 
 page.onConsoleMessage = function(msg) {
   console.log(msg);
@@ -11,12 +9,14 @@ page.onConsoleMessage = function(msg) {
 page.open(
   "https://oauth.vk.com/authorize?client_id=6886658&display=page&redirect_uri=https://oauth.vk.com/blank.html&scope=video,wall&response_type=token&v=5.92&state=123456",
   function(status) {
-    page.evaluate(function(config) {
-      config = JSON.parse(config);
+    page.evaluate(function(configJson) {
+      config = JSON.parse(configJson);
+      console.log(config.login);
+      console.log(config.password);
       document.querySelectorAll(".oauth_form_input")[0].value = config.login;
       document.querySelectorAll(".oauth_form_input")[1].value = config.password;
       document.querySelector("#install_allow").click();
-    }, config);
+    }, configJson);
     setTimeout(function() {
       page.evaluate(function() {
         try {
