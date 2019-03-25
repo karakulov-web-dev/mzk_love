@@ -159,13 +159,15 @@ var Api = /** @class */ (function () {
     };
     Api.prototype.textToSpeechGoCache = function () {
         this.wallCache.response.items.forEach(function (item) {
-            axios
-                .post("http://212.77.128.177:8081/getSpeech", {
-                text: item.text
-            })
-                .then()["catch"](function (e) {
-                console.log(e);
-            });
+            if (item.text) {
+                axios
+                    .post("http://212.77.128.177:8081/getSpeech", {
+                    text: item.text
+                })
+                    .then()["catch"](function (e) {
+                    console.log(e);
+                });
+            }
         });
     };
     Api.prototype.getWallUrl = function (offset) {

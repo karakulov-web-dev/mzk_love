@@ -197,14 +197,16 @@ class Api {
   }
   private textToSpeechGoCache() {
     this.wallCache.response.items.forEach((item: any) => {
-      axios
-        .post("http://212.77.128.177:8081/getSpeech", {
-          text: item.text
-        })
-        .then()
-        .catch((e: any) => {
-          console.log(e);
-        });
+      if (item.text) {
+        axios
+          .post("http://212.77.128.177:8081/getSpeech", {
+            text: item.text
+          })
+          .then()
+          .catch((e: any) => {
+            console.log(e);
+          });
+      }
     });
   }
 
