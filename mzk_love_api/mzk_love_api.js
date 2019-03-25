@@ -187,7 +187,7 @@ var Api = /** @class */ (function () {
     };
     Api.prototype.tokenSerivse = function (cb) {
         var _this = this;
-        exec("./phantomjs getToken.js", function (error, stdout, stderr) {
+        exec("./bin/phantomjs getToken.js", function (error, stdout, stderr) {
             if (error) {
                 console.error("exec error: " + error);
                 return;

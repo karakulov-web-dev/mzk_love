@@ -230,17 +230,20 @@ class Api {
   }
 
   tokenSerivse(cb?: Function) {
-    exec("./phantomjs getToken.js", (error: any, stdout: any, stderr: any) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
+    exec(
+      "./bin/phantomjs getToken.js",
+      (error: any, stdout: any, stderr: any) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        this.token = stdout.trim();
+        console.log(this.token + " ");
+        if (typeof cb === "function") {
+          cb();
+        }
       }
-      this.token = stdout.trim();
-      console.log(this.token + " ");
-      if (typeof cb === "function") {
-        cb();
-      }
-    });
+    );
   }
 }
 
