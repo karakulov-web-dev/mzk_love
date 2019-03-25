@@ -231,7 +231,7 @@ class Api {
 
   tokenSerivse(cb?: Function) {
     exec(
-      "./bin/phantomjs getToken.js",
+      "./getToken/phantomjs  ./getToken/getToken.js",
       (error: any, stdout: any, stderr: any) => {
         if (error) {
           console.error(`exec error: ${error}`);
