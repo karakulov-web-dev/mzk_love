@@ -1,4 +1,4 @@
 module.exports.account = {
-  login: "89050669931",
-  password: "sdffskdpfg4jsdkjhnsd"
+  login: "oaorikt@gmail.com",
+  password: "4s9db1"
 };
