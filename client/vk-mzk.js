@@ -25,7 +25,7 @@
   var createValue = CreateValue();
   var state = {
     route: createValue("/postList"),
-    bottomButton: createValue(["Читать", "Открыть", "Комментарии", ""]),
+    bottomButton: createValue(["Читать", "Открыть", "Комментарии", "Озвучить"]),
     wall: {
       postList: createValue([]),
       focusIndex: createValue(0),
@@ -74,7 +74,7 @@
     }
   };
   TextViewController.prototype.back = function(event) {
-    state.bottomButton.set(["Читать", "Открыть", "Комментарии", ""]);
+    state.bottomButton.set(["Читать", "Открыть", "Комментарии", "Озвучить"]);
     state.route.set("/postList");
     event.stopPropagation();
   };
@@ -101,7 +101,7 @@
     }
   };
   ImgViewController.prototype.back = function(event) {
-    state.bottomButton.set(["Читать", "Открыть", "Комментарии", ""]);
+    state.bottomButton.set(["Читать", "Открыть", "Комментарии", "Озвучить"]);
     state.route.set("/postList");
     event.stopPropagation();
   };
@@ -181,7 +181,7 @@
     }
   };
   CommentsListController.prototype.back = function(event) {
-    state.bottomButton.set(["Читать", "Открыть", "Комментарии", ""]);
+    state.bottomButton.set(["Читать", "Открыть", "Комментарии", "Озвучить"]);
     state.route.set("/postList");
     event.stopPropagation();
   };
@@ -249,7 +249,7 @@
 
   PostController.prototype.openTextView = function() {
     state.route.set("/textView");
-    state.bottomButton.set(["Назад", "", "", ""]);
+    state.bottomButton.set(["Назад", "", "", "Озвучить"]);
     var index = state.wall.focusIndex.get();
     var list = state.wall.postList.get();
     state.textView.text.set(list[index].text);
@@ -1568,7 +1568,12 @@
         this.superclass.show.call(this);
 
         state.route.set("/postList");
-        state.bottomButton.set(["Читать", "Открыть", "Комментарии", ""]);
+        state.bottomButton.set([
+          "Читать",
+          "Открыть",
+          "Комментарии",
+          "Озвучить"
+        ]);
         if (!doNotClean) {
           state.wall.postList.set([]);
           state.wall.focusIndex.set(0);
