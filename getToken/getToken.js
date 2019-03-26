@@ -11,8 +11,6 @@ page.open(
   function(status) {
     page.evaluate(function(configJson) {
       config = JSON.parse(configJson);
-      console.log(config.login);
-      console.log(config.password);
       document.querySelectorAll(".oauth_form_input")[0].value = config.login;
       document.querySelectorAll(".oauth_form_input")[1].value = config.password;
       document.querySelector("#install_allow").click();
