@@ -64,6 +64,13 @@
       case 112:
         this.back(event);
         break;
+      case 115:
+        try {
+          new PostController().speech();
+        } catch (e) {
+          console.log(e);
+        }
+        break;
     }
   };
   TextViewController.prototype.back = function(event) {
@@ -619,7 +626,7 @@
     this.create = function create() {
       this.subscribe(state.textView.text);
       var textView = state.textView.text.get();
-      var fontSize = "22px";
+      var fontSize = "26px";
       var height = "510px";
       if (screen.width < 1000) {
         fontSize = "18px";
