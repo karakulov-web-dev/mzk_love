@@ -626,7 +626,7 @@
     this.create = function create() {
       this.subscribe(state.textView.text);
       var textView = state.textView.text.get();
-      var fontSize = "26px";
+      var fontSize = "30px";
       var height = "510px";
       if (screen.width < 1000) {
         fontSize = "18px";
