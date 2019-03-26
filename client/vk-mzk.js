@@ -64,6 +64,9 @@
       case 112:
         this.back(event);
         break;
+      case 83:
+        stb.Stop();
+        break;
       case 115:
         try {
           new PostController().speech();
@@ -225,6 +228,9 @@
         } catch (e) {
           console.log(e);
         }
+        break;
+      case 83:
+        stb.Stop();
         break;
     }
   };
