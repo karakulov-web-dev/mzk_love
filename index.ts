@@ -1,6 +1,7 @@
 var { exec } = require("child_process");
 const axios = require("axios");
-import express from "express";
+import express, { response } from "express";
+import { text } from "body-parser";
 
 class Api {
   private token: string;
