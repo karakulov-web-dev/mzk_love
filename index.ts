@@ -1,17 +1,48 @@
 var { exec } = require("child_process");
-const axios = require("axios");
-import express, { response } from "express";
-import { text } from "body-parser";
+import axios from "axios";
+import express from "express";
+
+interface WallCache {
+  response: {
+    items: any[];
+    count: number;
+  };
+}
 
 class Api {
-  private token: string;
-  private wallCache: any;
+  private token: string | undefined;
+  private wallCache: WallCache;
 
   constructor() {
     let app = express();
     app.use(express.json());
 
-    // /mzk_love_api/get_wall
+    this.createApiPoint_get_wall(app);
+    this.createApiPoint_wall_get_comments(app);
+    this.createApiPoint_get_links(app);
+    this.createApiPoint_get_photos(app);
+
+    this.token = undefined;
+    this.wallCache = {
+      response: {
+        items: [],
+        count: 0
+      }
+    };
+
+    app.listen(8080);
+    console.log("mzk_love_api started on port 8080");
+  }
+
+  public main() {
+    this.tokenSerivse(() => {
+      this.wallCacheServise();
+    });
+    this.tokenServiseStart();
+    this.wallCacheServiseStart();
+  }
+
+  private createApiPoint_get_wall(app: express.Express) {
     app.get("/mzk_love_api/get_wall", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header(
@@ -26,8 +57,9 @@ class Api {
       }
       res.send(JSON.stringify({ status, result: this.wallCache }));
     });
+  }
 
-    // /mzk_love_api/wall_get_comments
+  private createApiPoint_wall_get_comments(app: express.Express) {
     app.get("/mzk_love_api/wall_get_comments", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header(
@@ -73,8 +105,9 @@ class Api {
           console.log(e);
         });
     });
+  }
 
-    // /apps/vk/get_links.php
+  private createApiPoint_get_links(app: express.Express) {
     app.get("/apps/vk/get_links.php", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header(
@@ -90,8 +123,9 @@ class Api {
           console.log(e);
         });
     });
+  }
 
-    // /mzk_love_api/get_photos
+  private createApiPoint_get_photos(app: express.Express) {
     app.get("/mzk_love_api/get_photos", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header(
@@ -112,9 +146,77 @@ class Api {
           console.log(e);
         });
     });
+  }
 
-    app.listen(8080);
-    console.log("mzk_love_api started on port 8080");
+  private tokenSerivse(cb?: Function) {
+    exec(
+      "./getToken/phantomjs  ./getToken/getToken.js",
+      (error: any, stdout: any, stderr: any) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        this.token = stdout.trim();
+        console.log(this.token + " ");
+        if (typeof cb === "function") {
+          cb();
+        }
+      }
+    );
+  }
+
+  private tokenServiseStart() {
+    setInterval(() => {
+      this.tokenSerivse();
+    }, 14400000); //4 часа
+  }
+
+  private wallCacheServise() {
+    axios
+      .get(this.getWallUrl())
+      .then((response: any) => {
+        this.wallCache = response.data;
+        return new Promise(resolve => {
+          resolve(axios);
+        });
+      })
+      .then((axios: any) => {
+        return axios.get(this.getWallUrl(100));
+      })
+      .then((response: any) => {
+        this.wallCache.response.items = this.wallCache.response.items.concat(
+          response.data.response.items
+        );
+        return new Promise(resolve => {
+          resolve(axios);
+        });
+      })
+      .then((axios: any) => {
+        return axios.get(this.getWallUrl(200));
+      })
+      .then((response: any) => {
+        this.wallCache.response.items = this.wallCache.response.items.concat(
+          response.data.response.items
+        );
+        return new Promise(resolve => {
+          resolve(true);
+        });
+      })
+      .then(() => {
+        this.textToSpeechGoCache();
+        return new Promise(resolve => {
+          resolve(true);
+        });
+      })
+      .catch((e: Error) => {
+        console.log(e);
+      });
+  }
+
+  private wallCacheServiseStart() {
+    setInterval(() => {
+      this.wallCacheServise();
+    }, 1800000); // 30 мин
   }
 
   private usersGet(from_idString: string) {
@@ -132,7 +234,7 @@ class Api {
             resolve(true);
           });
         })
-        .catch((e: any) => {
+        .catch((e: Error) => {
           console.log(e);
         });
     });
@@ -153,48 +255,6 @@ class Api {
     return Object.keys(idStore).join(",");
   }
 
-  wallCacheServiseStart() {
-    setInterval(() => {
-      this.wallCacheServise();
-    }, 1800000); // 30 мин
-  }
-  wallCacheServise() {
-    axios.get(this.getWallUrl()).then((response: any) => {
-      this.wallCache = response.data;
-      return new Promise(resolve => {
-        resolve(axios);
-      });
-    });
-
-    axios.get(this.getWallUrl(100)).then((response: any) => {
-      this.wallCache.response.items = this.wallCache.response.items.concat(
-        response.data.response.items
-      );
-      return new Promise(resolve => {
-        resolve(axios);
-      });
-    });
-
-    axios
-      .get(this.getWallUrl(200))
-      .then((response: any) => {
-        this.wallCache.response.items = this.wallCache.response.items.concat(
-          response.data.response.items
-        );
-        return new Promise(resolve => {
-          resolve(true);
-        });
-      })
-      .then(() => {
-        this.textToSpeechGoCache();
-        return new Promise(resolve => {
-          resolve(true);
-        });
-      })
-      .catch((e: any) => {
-        console.log(e);
-      });
-  }
   private textToSpeechGoCache() {
     this.wallCache.response.items.forEach((item: any) => {
       if (item.text) {
@@ -203,7 +263,7 @@ class Api {
             text: item.text
           })
           .then()
-          .catch((e: any) => {
+          .catch((e: Error) => {
             console.log(e);
           });
       }
@@ -222,35 +282,7 @@ class Api {
       }&owner_id=-11504106&count=100` + offset
     );
   }
-
-  tokenServiseStart() {
-    setInterval(() => {
-      this.tokenSerivse();
-    }, 14400000); //4 часа
-  }
-
-  tokenSerivse(cb?: Function) {
-    exec(
-      "./getToken/phantomjs  ./getToken/getToken.js",
-      (error: any, stdout: any, stderr: any) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return;
-        }
-        this.token = stdout.trim();
-        console.log(this.token + " ");
-        if (typeof cb === "function") {
-          cb();
-        }
-      }
-    );
-  }
 }
 
 let api = new Api();
-
-api.tokenSerivse(() => {
-  api.wallCacheServise();
-});
-api.tokenServiseStart();
-api.wallCacheServiseStart();
+api.main();
