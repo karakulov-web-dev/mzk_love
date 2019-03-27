@@ -124,7 +124,7 @@ var Api = /** @class */ (function () {
         var _this = this;
         setInterval(function () {
             _this.wallCacheServise();
-        }, 180000); // 30 мин
+        }, 1800000); // 30 мин
     };
     Api.prototype.wallCacheServise = function () {
         var _this = this;
@@ -183,7 +183,7 @@ var Api = /** @class */ (function () {
         var _this = this;
         setInterval(function () {
             _this.tokenSerivse();
-        }, 720000); // час
+        }, 14400000); //4 часа
     };
     Api.prototype.tokenSerivse = function (cb) {
         var _this = this;

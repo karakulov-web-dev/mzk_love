@@ -156,7 +156,7 @@ class Api {
   wallCacheServiseStart() {
     setInterval(() => {
       this.wallCacheServise();
-    }, 180000); // 30 мин
+    }, 1800000); // 30 мин
   }
   wallCacheServise() {
     axios.get(this.getWallUrl()).then((response: any) => {
@@ -226,7 +226,7 @@ class Api {
   tokenServiseStart() {
     setInterval(() => {
       this.tokenSerivse();
-    }, 720000); // час
+    }, 14400000); //4 часа
   }
 
   tokenSerivse(cb?: Function) {
