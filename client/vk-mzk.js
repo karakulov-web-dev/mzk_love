@@ -74,6 +74,12 @@
           console.log(e);
         }
         break;
+      case 109:
+        new PostController().volumePlus();
+        break;
+      case 107:
+        new PostController().volumeMinus();
+        break;
     }
   };
   TextViewController.prototype.back = function(event) {
@@ -232,6 +238,12 @@
       case 83:
         stb.Stop();
         break;
+      case 109:
+        this.volumePlus();
+        break;
+      case 107:
+        this.volumeMinus();
+        break;
     }
   };
 
@@ -345,6 +357,32 @@
     module.mzk.hide();
     stb.player.prev_layer = module.mzk;
     stb.player.play(item);
+  };
+
+  PostController.prototype.volumePlus = function() {
+    try {
+      var vol = stb.GetVolume();
+      vol = vol + 10;
+      if (vol > 100) {
+        vol = 100;
+      }
+      stb.SetVolume(vol);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  PostController.prototype.volumeMinus = function() {
+    try {
+      var vol = stb.GetVolume();
+      if (vol <= 10) {
+        vol = 0;
+      } else {
+        vol = vol - 10;
+      }
+      stb.SetVolume(vol);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   PostController.prototype.openImgView = function(imgSrcArr) {
