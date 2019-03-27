@@ -3,10 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-var exec = require("child_process").exec;
+var child_process_1 = require("child_process");
 var axios_1 = __importDefault(require("axios"));
 var express_1 = __importDefault(require("express"));
+/**
+ * Описывает обьект содержащий всю логику обработки запросов и кеширования;
+ */
 var Api = /** @class */ (function () {
+    /**
+     * Инициализирует express server на 8080 порту.
+     * Создает конечные точки для обработки http запросов используя функции:
+     *
+     * [[createApiPoint_get_wall]],
+     * [[createApiPoint_wall_get_comments]],
+     * [[createApiPoint_get_links]],
+     * [[createApiPoint_get_photos]]
+     */
     function Api() {
         var app = express_1["default"]();
         app.use(express_1["default"].json());
@@ -24,6 +36,13 @@ var Api = /** @class */ (function () {
         app.listen(8080);
         console.log("mzk_love_api started on port 8080");
     }
+    /**
+     * Точка входа в риложения;
+     * Получает начальный [[token]];
+     * Получает начальный [[wallCache]];
+     * Запускает сервис обновления [[token]];
+     * Запускает сервис обновления [[wallCache]];
+     */
     Api.prototype.main = function () {
         var _this = this;
         this.tokenSerivse(function () {
@@ -32,6 +51,10 @@ var Api = /** @class */ (function () {
         this.tokenServiseStart();
         this.wallCacheServiseStart();
     };
+    /**
+     * Создает точку обрабатывающую http запрос get_wall
+     *  запрос на данную точку апи просто возвращает [[Wall_get_result]];
+     */
     Api.prototype.createApiPoint_get_wall = function (app) {
         var _this = this;
         app.get("/mzk_love_api/get_wall", function (req, res) {
@@ -44,9 +67,17 @@ var Api = /** @class */ (function () {
             else {
                 status = false;
             }
-            res.send(JSON.stringify({ status: status, result: _this.wallCache }));
+            var wall_get_result = { status: status, result: _this.wallCache };
+            res.send(JSON.stringify(wall_get_result));
         });
     };
+    /**
+     * Создает точку обрабатывающую http запрос wall_get_comments
+     * запрос возвращает комментарии к посту;
+     * функция делает магию связанную с получение фотографий пользователей,
+     * так что это  не соответсвует стандартной структуре api vk)
+     * в параметрах get запроса должны быть переданы owner_id и post_id
+     */
     Api.prototype.createApiPoint_wall_get_comments = function (app) {
         var _this = this;
         app.get("/mzk_love_api/wall_get_comments", function (req, res) {
@@ -83,6 +114,11 @@ var Api = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Создает точку обрабатывающую http запрос get_links;
+     * Точка api возвращает прямую ссылку для проигрывания видео;
+     * В параметре get запрос должен быть передан url ссылки  на пеер vk.
+     */
     Api.prototype.createApiPoint_get_links = function (app) {
         app.get("/apps/vk/get_links.php", function (req, res) {
             res.header("Access-Control-Allow-Origin", "*");
@@ -113,9 +149,14 @@ var Api = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Метод получает access token для работы с api vk;
+     * access token сохраняется в [[token]]
+     * По завершенни работы вызывает функцию cb если она существует;
+     */
     Api.prototype.tokenSerivse = function (cb) {
         var _this = this;
-        exec("./getToken/phantomjs  ./getToken/getToken.js", function (error, stdout, stderr) {
+        child_process_1.exec("./getToken/phantomjs  ./getToken/getToken.js", function (error, stdout, stderr) {
             if (error) {
                 console.error("exec error: " + error);
                 return;
@@ -127,12 +168,18 @@ var Api = /** @class */ (function () {
             }
         });
     };
+    /**
+     * Вызывает [[tokenSerivse]] раз в 4 часа
+     */
     Api.prototype.tokenServiseStart = function () {
         var _this = this;
         setInterval(function () {
             _this.tokenSerivse();
         }, 14400000); //4 часа
     };
+    /**
+     * получает последние 300 записей vk_mzk и сохраняет их в [[wallCache]]
+     */
     Api.prototype.wallCacheServise = function () {
         var _this = this;
         axios_1["default"]
@@ -170,12 +217,19 @@ var Api = /** @class */ (function () {
             console.log(e);
         });
     };
+    /**
+     * вызывает [[wallCacheServise]] раз в 30 минут
+     */
     Api.prototype.wallCacheServiseStart = function () {
         var _this = this;
         setInterval(function () {
             _this.wallCacheServise();
         }, 1800000); // 30 мин
     };
+    /**
+     * вспомогательная функция для [[createApiPoint_wall_get_comments]]
+     * @param from_idString список id пользователей через запятую
+     */
     Api.prototype.usersGet = function (from_idString) {
         var _this = this;
         return new Promise(function (resolve) {
@@ -194,6 +248,9 @@ var Api = /** @class */ (function () {
             });
         });
     };
+    /**
+     * вспомогательная функция для [[createApiPoint_wall_get_comments]]
+     */
     Api.prototype.getFrom_idStringFromComments = function (commentsArr) {
         function reducer(acum, item) {
             acum[item.from_id] = true;
@@ -208,6 +265,10 @@ var Api = /** @class */ (function () {
         var idStore = commentsArr.reduce(reducer, {});
         return Object.keys(idStore).join(",");
     };
+    /**
+     * Отпраляет просьбу сервесу синтеза речи,
+     * закешировать текст находящийся в постах [[wallCache]]
+     */
     Api.prototype.textToSpeechGoCache = function () {
         this.wallCache.response.items.forEach(function (item) {
             if (item.text) {
@@ -221,6 +282,9 @@ var Api = /** @class */ (function () {
             }
         });
     };
+    /**
+     * вспомогательная функция для [[wallCacheServise]]
+     */
     Api.prototype.getWallUrl = function (offset) {
         if (typeof offset === "undefined") {
             offset = "";

@@ -1,18 +1,61 @@
-var { exec } = require("child_process");
+import { exec } from "child_process";
 import axios from "axios";
 import express from "express";
 
+/**
+ * Описывает структуру которую мы будет возвращать на запрос get_wall.
+ * Обработчик этого запроса создается функцией [[createApiPoint_get_wall]]
+ */
+interface Wall_get_result {
+  status: boolean;
+  result: WallCache;
+}
+
+/**
+ * Описывает упрощенную структуру которуая соотвествует записям на стене vk_mzk
+ */
 interface WallCache {
   response: {
-    items: any[];
+    items: WallCacheItem[];
     count: number;
   };
 }
 
+/**
+ *  Описывает структуру поста, по упрощенной схеме.
+ *  На текущий момент нас не слишком интересует содержимое т,к
+ *  мы просто отдаем эти данные клиенту
+ *
+ *  Поле текст пригодится для кеширования синтеза речи.
+ */
+interface WallCacheItem {
+  text: string;
+}
+
+/**
+ * Описывает обьект содержащий всю логику обработки запросов и кеширования;
+ */
 class Api {
+  /**
+   * содержит access token.
+   * он нужен для работы с api vk
+   */
   private token: string | undefined;
+  /**
+   * хранит данные которые мы будет возвращать на запрос get_wall
+   * это является кэшем стены vk (последние 300 постов)
+   */
   private wallCache: WallCache;
 
+  /**
+   * Инициализирует express server на 8080 порту.
+   * Создает конечные точки для обработки http запросов используя функции:
+   *
+   * [[createApiPoint_get_wall]],
+   * [[createApiPoint_wall_get_comments]],
+   * [[createApiPoint_get_links]],
+   * [[createApiPoint_get_photos]]
+   */
   constructor() {
     let app = express();
     app.use(express.json());
@@ -34,6 +77,13 @@ class Api {
     console.log("mzk_love_api started on port 8080");
   }
 
+  /**
+   * Точка входа в риложения;
+   * Получает начальный [[token]];
+   * Получает начальный [[wallCache]];
+   * Запускает сервис обновления [[token]];
+   * Запускает сервис обновления [[wallCache]];
+   */
   public main() {
     this.tokenSerivse(() => {
       this.wallCacheServise();
@@ -42,6 +92,10 @@ class Api {
     this.wallCacheServiseStart();
   }
 
+  /**
+   * Создает точку обрабатывающую http запрос get_wall
+   *  запрос на данную точку апи просто возвращает [[Wall_get_result]];
+   */
   private createApiPoint_get_wall(app: express.Express) {
     app.get("/mzk_love_api/get_wall", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -55,10 +109,18 @@ class Api {
       } else {
         status = false;
       }
-      res.send(JSON.stringify({ status, result: this.wallCache }));
+      let wall_get_result: Wall_get_result = { status, result: this.wallCache };
+      res.send(JSON.stringify(wall_get_result));
     });
   }
 
+  /**
+   * Создает точку обрабатывающую http запрос wall_get_comments
+   * запрос возвращает комментарии к посту;
+   * функция делает магию связанную с получение фотографий пользователей,
+   * так что это  не соответсвует стандартной структуре api vk)
+   * в параметрах get запроса должны быть переданы owner_id и post_id
+   */
   private createApiPoint_wall_get_comments(app: express.Express) {
     app.get("/mzk_love_api/wall_get_comments", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -107,6 +169,11 @@ class Api {
     });
   }
 
+  /**
+   * Создает точку обрабатывающую http запрос get_links;
+   * Точка api возвращает прямую ссылку для проигрывания видео;
+   * В параметре get запрос должен быть передан url ссылки  на пеер vk.
+   */
   private createApiPoint_get_links(app: express.Express) {
     app.get("/apps/vk/get_links.php", (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -148,6 +215,11 @@ class Api {
     });
   }
 
+  /**
+   * Метод получает access token для работы с api vk;
+   * access token сохраняется в [[token]]
+   * По завершенни работы вызывает функцию cb если она существует;
+   */
   private tokenSerivse(cb?: Function) {
     exec(
       "./getToken/phantomjs  ./getToken/getToken.js",
@@ -165,12 +237,19 @@ class Api {
     );
   }
 
+  /**
+   * Вызывает [[tokenSerivse]] раз в 4 часа
+   */
+
   private tokenServiseStart() {
     setInterval(() => {
       this.tokenSerivse();
     }, 14400000); //4 часа
   }
 
+  /**
+   * получает последние 300 записей vk_mzk и сохраняет их в [[wallCache]]
+   */
   private wallCacheServise() {
     axios
       .get(this.getWallUrl())
@@ -213,12 +292,19 @@ class Api {
       });
   }
 
+  /**
+   * вызывает [[wallCacheServise]] раз в 30 минут
+   */
   private wallCacheServiseStart() {
     setInterval(() => {
       this.wallCacheServise();
     }, 1800000); // 30 мин
   }
 
+  /**
+   * вспомогательная функция для [[createApiPoint_wall_get_comments]]
+   * @param from_idString список id пользователей через запятую
+   */
   private usersGet(from_idString: string) {
     return new Promise(resolve => {
       axios
@@ -240,6 +326,9 @@ class Api {
     });
   }
 
+  /**
+   * вспомогательная функция для [[createApiPoint_wall_get_comments]]
+   */
   private getFrom_idStringFromComments(commentsArr: any[]) {
     function reducer(acum: any, item: any) {
       acum[item.from_id] = true;
@@ -255,6 +344,10 @@ class Api {
     return Object.keys(idStore).join(",");
   }
 
+  /**
+   * Отпраляет просьбу сервесу синтеза речи,
+   * закешировать текст находящийся в постах [[wallCache]]
+   */
   private textToSpeechGoCache() {
     this.wallCache.response.items.forEach((item: any) => {
       if (item.text) {
@@ -270,6 +363,9 @@ class Api {
     });
   }
 
+  /**
+   * вспомогательная функция для [[wallCacheServise]]
+   */
   private getWallUrl(offset?: number | string) {
     if (typeof offset === "undefined") {
       offset = "";
