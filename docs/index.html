@@ -64,6 +64,18 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
+				<h1 id="-vk_mzk-">приложение vk_mzk;</h1>
+				<p>Зависит от:
+					<a href="http://212.77.128.177:8081/getSpeech">http://212.77.128.177:8081/getSpeech</a> - синтез речи
+				<a href="https://api.vk.com/">https://api.vk.com/</a> - vk api</p>
+				<p>Запуск: node index.js</p>
+				<p>Структура каталогов:
+					client - клиентская часть (скрипты для stalker portal)
+					docs - подобие документации
+					getToken - phantomjs bot парсит access token для работы с vk api
+					account.config.js - Данные для авторизации в вк для getToken.js
+					index.ts - точка входа typescript (исходник) backend
+				index.js - точка входа backend запуск : node index.js</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
