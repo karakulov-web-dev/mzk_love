@@ -235,10 +235,10 @@
         stb.Stop();
         break;
       case 109:
-        this.volumePlus();
+        this.volumeMinus();
         break;
       case 107:
-        this.volumeMinus();
+        this.volumePlus();
         break;
     }
   };
