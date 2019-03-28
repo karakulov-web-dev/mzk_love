@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import axios from "axios";
 import express from "express";
+import { type } from "os";
 
 /**
  * Описывает структуру которую мы будет возвращать на запрос get_wall.
@@ -349,18 +350,33 @@ class Api {
    * закешировать текст находящийся в постах [[wallCache]]
    */
   private textToSpeechGoCache() {
-    this.wallCache.response.items.forEach((item: any) => {
+    let items: WallCacheItem[] = JSON.parse(
+      JSON.stringify(this.wallCache.response.items)
+    );
+    recurse(items);
+
+    function recurse(items: WallCacheItem[]) {
+      let item = items.shift();
+      if (typeof item === "undefined") {
+        return;
+      }
       if (item.text) {
         axios
           .post("http://212.77.128.177:8081/getSpeech", {
             text: item.text
           })
-          .then()
+          .then(() => {
+            recurse(items);
+          })
           .catch((e: Error) => {
             console.log(e);
+            return;
           });
+      } else {
+        recurse(items);
+        return;
       }
-    });
+    }
   }
 
   /**

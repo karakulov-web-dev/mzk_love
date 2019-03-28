@@ -270,17 +270,30 @@ var Api = /** @class */ (function () {
      * закешировать текст находящийся в постах [[wallCache]]
      */
     Api.prototype.textToSpeechGoCache = function () {
-        this.wallCache.response.items.forEach(function (item) {
+        var items = JSON.parse(JSON.stringify(this.wallCache.response.items));
+        recurse(items);
+        function recurse(items) {
+            var item = items.shift();
+            if (typeof item === "undefined") {
+                return;
+            }
             if (item.text) {
                 axios_1["default"]
                     .post("http://212.77.128.177:8081/getSpeech", {
                     text: item.text
                 })
-                    .then()["catch"](function (e) {
+                    .then(function () {
+                    recurse(items);
+                })["catch"](function (e) {
                     console.log(e);
+                    return;
                 });
             }
-        });
+            else {
+                recurse(items);
+                return;
+            }
+        }
     };
     /**
      * вспомогательная функция для [[wallCacheServise]]
