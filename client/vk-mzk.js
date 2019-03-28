@@ -68,11 +68,7 @@
         stb.Stop();
         break;
       case 115:
-        try {
-          new PostController().speech();
-        } catch (e) {
-          console.log(e);
-        }
+        new PostController().speech();
         break;
       case 109:
         new PostController().volumePlus();
@@ -1636,9 +1632,7 @@
         this.load();
       };
 
-      this.key_press = function(button) {
-        // console.log(button);
-      };
+      this.key_press = function(button) {};
 
       this.hide = function() {
         this.superclass.hide.call(this);
