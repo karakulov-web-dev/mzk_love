@@ -818,6 +818,11 @@
   };
 
   var CommentsList_comment_thread = function CommentsList_comment_thread(item) {
+    if (!item.thread) {
+      item.thread = {
+        items: []
+      };
+    }
     try {
       var listElem = item.thread.items.map(function(item) {
         var wrap = createElement("div");
