@@ -4,14 +4,14 @@
   var mzk = new mzk_constructor();
   mzk.init();
   mzk.bind();
-  mzk.init_header_path("mzk test");
+  mzk.init_header_path("Типичный междуреченск");
   mzk.hide();
   module.mzk = mzk;
   if (!module.my_city_sub) {
     module.my_city_sub = [];
   }
   module.my_city_sub.push({
-    title: "mzk test",
+    title: "Типичный междуреченск тест",
     cmd: function() {
       main_menu.hide();
       module.mzk.show(false);
@@ -969,13 +969,29 @@
   post_attachments.prototype = baseComponent;
 
   var post_date = function(item) {
+    const MONTH_ARR = [
+      "Января",
+      "Февраля",
+      "Марта",
+      "Апреля",
+      "Мая",
+      "Июня",
+      "Июля",
+      "Августа",
+      "Сентября",
+      "Октября",
+      "Ноября",
+      "Декабря"
+    ];
     var date = new Date(item.date * 1000);
-    date = date.toISOString();
-    date = date.split("T");
-    date[1] = date[1].split(":");
-    date[1] = date[1][0] + ":" + date[1][1];
-    date = date[0] + " " + date[1];
-    return createElement("div", undefined, undefined, undefined, date);
+    var day = date.getDay();
+    var month = MONTH_ARR[date.getMonth() + 1];
+    var year = date.getFullYear();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var dateString =
+      day + " " + month + " " + year + " в " + hours + ":" + minutes;
+    return createElement("div", undefined, undefined, undefined, dateString);
   };
 
   var post_text = function(item) {
