@@ -989,6 +989,9 @@
     var year = date.getFullYear();
     var hours = date.getHours();
     var minutes = date.getMinutes();
+    if (minutes < 10) {
+      minutes = "0" + minutes  
+    }
     var dateString =
       day + " " + month + " " + year + " в " + hours + ":" + minutes;
     return createElement("div", undefined, undefined, undefined, dateString);
