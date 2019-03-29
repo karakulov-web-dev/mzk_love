@@ -195,7 +195,11 @@
     this.postList = postList;
   }
   PostController.prototype.keydown = function(event) {
+    console.log(event.keyCode);
     switch (event.keyCode) {
+      case 119:
+        location = location;
+        break;
       case 40:
         this.next();
         break;
@@ -876,11 +880,13 @@
       }
       var style = {
         overflowY: "scroll",
-        margin: "20px",
+        margin: "0px",
         top: "70px",
         height: height,
         position: "relative",
-        left: "-10px"
+        left: "0px",
+        paddingRight: "20px",
+        paddingLeft: "10px"
       };
       var ul = createElement("ul", "vk_mzk_PostList", style, list);
       ul.tabIndex = 0;
@@ -897,6 +903,32 @@
     };
   };
   PostList.prototype = baseComponent;
+
+  /**
+   *
+   * <div class="mb_scroll">
+   *    <div class="mb_scroll_t" style="height: 425px;">
+   *        <div class="mb_scroll_c"></div>
+   *    </div>
+   *    <div class="mb_scroll_b"></div>
+   * </div>}
+   */
+  function VerticalScroll() {
+    this.create = function create() {
+      return createElement("div", "mb_scroll", undefined, [
+        createElement(
+          "div",
+          "mb_scroll_t",
+          {
+            height: "425px"
+          },
+          [createElement("div", "mb_scroll_c")]
+        ),
+        createElement("div", "mb_scroll_b")
+      ]);
+    };
+  }
+  VerticalScroll.prototype = baseComponent;
 
   var Post = function Post(item) {
     this.create = function create() {
@@ -990,7 +1022,7 @@
     var hours = date.getHours();
     var minutes = date.getMinutes();
     if (minutes < 10) {
-      minutes = "0" + minutes  
+      minutes = "0" + minutes;
     }
     var dateString =
       day + " " + month + " " + year + " в " + hours + ":" + minutes;
