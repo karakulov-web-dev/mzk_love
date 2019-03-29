@@ -4,7 +4,7 @@
   var mzk = new mzk_constructor();
   mzk.init();
   mzk.bind();
-  mzk.init_header_path("Типичный междуреченск");
+  mzk.init_header_path("Типичный Междуреченск");
   mzk.hide();
   module.mzk = mzk;
   if (!module.my_city_sub) {
