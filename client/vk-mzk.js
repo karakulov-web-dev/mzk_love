@@ -889,12 +889,6 @@ try {
         style = {};
       }
       this.create = function create() {
-        var border;
-        if (item.focus) {
-          border = "2px solid";
-        } else {
-          border = "none";
-        }
         var childsList = [
           post_date(item),
           CommentsList_comment_User_name(item),
@@ -931,8 +925,7 @@ try {
             fontSize: fontSize,
             color: "#fff",
             position: "relative",
-            left: left,
-            border: border
+            left: left
           },
           childsList,
           undefined
@@ -1229,11 +1222,16 @@ try {
 
     var Post = function Post(item) {
       this.create = function create() {
-        var border;
+        var opacity;
+        var color;
         if (item.focus) {
-          border = "2px solid";
+          opacity = "1";
+          color = "#fff";
+          background = "url(template/default/i_720/alfa2.png)";
         } else {
-          border = "none";
+          opacity = "0.5";
+          color = "#CCCCCC";
+          background = "url(template/default/i_720/25alfa_20.png)";
         }
         var post_attachments_wrap = document.createElement("div");
         var postAttachments = new post_attachments();
@@ -1255,11 +1253,12 @@ try {
             padding: "10px",
             margin: "20px",
             minHeight: "130px",
-            background: "url(template/default/i_720/25alfa_20.png)",
+            background: background,
             fontSize: fontSize,
-            color: "#fff",
+            color: color,
             position: "relative",
-            left: "10px"
+            left: "10px",
+            opacity: opacity
           },
           childsList,
           undefined
