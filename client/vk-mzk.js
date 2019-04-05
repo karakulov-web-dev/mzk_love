@@ -1,4 +1,52 @@
 try {
+  function Internet_connection_check() {
+    this.check = function() {
+      var self = this;
+      setTimeout(function() {
+        self.checkInternet();
+      }, 1);
+    };
+
+    this.checkInternet = function() {
+      var self = this;
+      setTimeout(function() {
+        self._failed();
+      }, 7000);
+      var url = "http://google.com";
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.open("GET", url, true);
+      xmlhttp.send();
+      xmlhttp.onreadystatechange = function() {
+        self.internetStatus = xmlhttp.status;
+        if (xmlhttp.readyState === 4) {
+          self.internetStatus = xmlhttp.status;
+          if (self.internetStatus == 200) {
+            self.successfully();
+            self._clear();
+          } else {
+            self.fail();
+            self._clear();
+          }
+        }
+      };
+    };
+    this.successfully = function successfully() {};
+    this.fail = function fail() {};
+    this.internetStatus = 0;
+    this._clear = function _clear() {
+      clearTimeout(this._timeout);
+      this.successfully = function() {};
+      this.fail = function() {};
+      this.internetStatus = 0;
+    };
+    this._failed = function() {
+      this.fail();
+      this._clear();
+    };
+    this._timeout = undefined;
+  }
+  var internet_connection_check = new Internet_connection_check();
+
   /**
    * Полифил для метода заполнения для строк padStart()
    * https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/String/padStart
@@ -45,7 +93,7 @@ try {
     /// model
     var createValue = CreateValue();
     var state = {
-      route: createValue("/postList"),
+      route: createValue("/loading"),
       bottomButton: createValue([
         "Читать",
         "Открыть",
@@ -132,6 +180,20 @@ try {
       var elem = document.querySelector(this.targetSelector);
       elem.scrollTop = elem.scrollTop - 10;
       state.textView.scrollTop.set(elem.scrollTop);
+    };
+
+    function ErrorInternetPageController() {}
+    ErrorInternetPageController.prototype.keydown = function(event) {
+      switch (event.keyCode) {
+        case 8:
+          mzk.hide();
+          main_menu.show();
+          break;
+        case 112:
+          mzk.hide();
+          main_menu.show();
+          break;
+      }
     };
 
     function ImgViewController() {}
@@ -416,7 +478,7 @@ try {
     };
 
     PostController.prototype.openVideo = function(focusAttach) {
-      state.route.set("/blank");
+      state.route.set("/loading");
       var self = this;
       HTTP.videoGet(focusAttach.video.owner_id, focusAttach.video.id, function(
         result
@@ -658,7 +720,7 @@ try {
               verticalScroll.render(verticalScrollWrap);
             })();
             break;
-          case "/blank":
+          case "/loading":
             (function() {
               var imgLoadingWhell = createElement("img", undefined, {
                 position: "absolute",
@@ -684,6 +746,22 @@ try {
               div.appendChild(blankWrap);
             })();
             break;
+          case "/errorInternet":
+            (function() {
+              var errorInternetWrap = createElement("div");
+              new ErrorInternet().render(errorInternetWrap);
+              div.appendChild(errorInternetWrap);
+
+              errorInternetWrap.tabIndex = 0;
+              setTimeout(function() {
+                errorInternetWrap.focus();
+              }, 0);
+              var errorInternetPageController = new ErrorInternetPageController();
+              div.onkeydown = function(event) {
+                errorInternetPageController.keydown(event);
+              };
+            })();
+            break;
         }
         var bottomButtonWrap = createElement("div", undefined, undefined, [
           bottomButton(
@@ -698,6 +776,34 @@ try {
       };
     };
     MzkMainContainer.prototype = baseComponent;
+
+    var ErrorInternet = function() {
+      this.create = function() {
+        var div = createElement("div", undefined, {
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          right: "0px",
+          bottom: "0px",
+          zIndex: "101"
+        });
+        var html =
+          '<div class="cut_off" style="display: block; ">' +
+          '<div class="cut_off_text">' +
+          "Для работы приложения необходимо интернет соединение." +
+          "<br>" +
+          "Для подключения обратитесь к оператору" +
+          "<br>" +
+          "по тел. 65-000." +
+          "</div>" +
+          '<div class="blocking_buttons"><div class="blocking_account_reboot"><div class="color_btn red"></div>' +
+          " Назад" +
+          "</div></div></div>";
+        div.innerHTML = html;
+        return div;
+      };
+    };
+    ErrorInternet.prototype = baseComponent;
 
     var ImgView = function() {
       this.create = function create() {
@@ -2016,7 +2122,14 @@ try {
             /\/.*/,
             "/ "
           );
-          state.route.set("/postList");
+          state.route.set("/loading");
+          internet_connection_check.check();
+          internet_connection_check.successfully = function() {
+            state.route.set("/postList");
+          };
+          internet_connection_check.fail = function() {
+            state.route.set("/errorInternet");
+          };
           module.mzk.header_path.innerText = module.mzk.header_path.innerText.replace(
             /\/.*/,
             "/ "
