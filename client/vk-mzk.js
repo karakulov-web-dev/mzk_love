@@ -1390,7 +1390,7 @@ try {
         if (item.focus) {
           opacity = "1";
           color = "#fff";
-          background = "url(template/default/i_720/alfa2.png)";
+          background = "url(template/default/i_720/vk_mzk_bg_active_post.png)";
         } else {
           opacity = "0.5";
           color = "#CCCCCC";
