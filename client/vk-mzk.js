@@ -1015,9 +1015,23 @@ try {
           comment.render(wrap);
           return wrap;
         });
-        var height = "560px";
-        var left = "20px";
-        if (screen.width < 1000) {
+
+        var height;
+        var left;
+
+        if (screen.width >= 1000 && stb.mac.substring(0, 8) == "10:27:BE") {
+          left = "40px";
+          height = "560px";
+        } else if (screen.width >= 1000) {
+          left = "20px";
+          height = "560px";
+        } else if (
+          screen.width < 1000 &&
+          stb.mac.substring(0, 8) == "10:27:BE"
+        ) {
+          height = "460px";
+          left = "25px";
+        } else if (screen.width < 1000) {
           height = "460px";
           left = "25px";
         }
@@ -1061,7 +1075,7 @@ try {
             undefined,
             { marginLeft: "220px" },
             undefined,
-            replaceEmojis(item.text)
+            replaceEmojis(item.text || "")
           ),
           CommentsList_comment_thread(item)
         ];
@@ -1198,9 +1212,23 @@ try {
           i++;
           return wrap;
         });
-        var left = "0px";
-        var height = "560px";
-        if (screen.width < 1000) {
+
+        var left;
+        var height;
+
+        if (screen.width >= 1000 && stb.mac.substring(0, 8) == "10:27:BE") {
+          left = "20px";
+          height = "560px";
+        } else if (screen.width >= 1000) {
+          left = "0px";
+          height = "560px";
+        } else if (
+          screen.width < 1000 &&
+          stb.mac.substring(0, 8) == "10:27:BE"
+        ) {
+          height = "460px";
+          left = "10px";
+        } else if (screen.width < 1000) {
           height = "460px";
           left = "10px";
         }
@@ -1262,10 +1290,20 @@ try {
         ]);
       };
       this.getStyle = function() {
-        var right = "27px";
-        if (screen.width < 1000) {
+        var right;
+        if (screen.width >= 1000 && stb.mac.substring(0, 8) == "10:27:BE") {
+          right = "0px";
+        } else if (screen.width >= 1000) {
+          right = "20px";
+        } else if (
+          screen.width < 1000 &&
+          stb.mac.substring(0, 8) == "10:27:BE"
+        ) {
+          right = "17px";
+        } else if (screen.width < 1000) {
           right = "17px";
         }
+
         return {
           position: "absolute",
           right: right,
@@ -1983,6 +2021,7 @@ try {
       }
       return string.replace(regex, emojiReplacer);
     }
+
     function dec2hex(dec, padding) {
       return parseInt(dec, 10)
         .toString(16)
@@ -2042,7 +2081,7 @@ try {
         var xhr = new XMLHttpRequest();
         xhr.open(
           "get",
-          "http://212.77.128.177:8080/mzk_love_api/get_wall",
+          "http://212.77.128.203:8080/mzk_love_api/get_wall",
           true
         );
         xhr.send();
@@ -2061,7 +2100,7 @@ try {
         var xhr = new XMLHttpRequest();
         xhr.open(
           "get",
-          "http://212.77.128.177:8080/mzk_love_api/wall_get_comments?owner_id=" +
+          "http://212.77.128.203:8080/mzk_love_api/wall_get_comments?owner_id=" +
             owner_id +
             "&" +
             "post_id=" +
@@ -2081,7 +2120,7 @@ try {
 
       Http.videoGet = function videoGet(owner_id, id, cb) {
         var url =
-          "http://212.77.128.177:8080/apps/vk/get_links.php?url=https://vk.com/mzk_love?z=video" +
+          "http://212.77.128.203:8080/apps/vk/get_links.php?url=https://vk.com/mzk_love?z=video" +
           owner_id +
           "_" +
           id;
@@ -2100,7 +2139,7 @@ try {
 
       Http.photosGet = function photosGet(owner_id, id, cb) {
         var url =
-          "http://212.77.128.177:8080/mzk_love_api/get_photos?owner_id=" +
+          "http://212.77.128.203:8080/mzk_love_api/get_photos?owner_id=" +
           owner_id +
           "&album_id=" +
           id;
@@ -2118,7 +2157,7 @@ try {
       };
 
       Http.speechGet = function speechGet(text, cb) {
-        var url = "http://212.77.128.177:8081/getSpeech";
+        var url = "http://212.77.128.203:8081/getSpeech";
         var xhr = new XMLHttpRequest();
         var data = {};
         data.text = text;

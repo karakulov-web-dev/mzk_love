@@ -279,7 +279,7 @@ var Api = /** @class */ (function () {
             }
             if (item.text) {
                 axios_1["default"]
-                    .post("http://212.77.128.177:8081/getSpeech", {
+                    .post("http://212.77.128.203:8081/getSpeech", {
                     text: item.text
                 })
                     .then(function () {

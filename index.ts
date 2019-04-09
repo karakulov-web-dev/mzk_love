@@ -362,7 +362,7 @@ class Api {
       }
       if (item.text) {
         axios
-          .post("http://212.77.128.177:8081/getSpeech", {
+          .post("http://212.77.128.203:8081/getSpeech", {
             text: item.text
           })
           .then(() => {
