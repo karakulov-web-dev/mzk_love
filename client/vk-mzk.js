@@ -137,7 +137,7 @@ try {
       module.my_city_sub = [];
     }
     module.my_city_sub.push({
-      title: "Типичный междуреченск",
+      title: "[TM] 18+",
       cmd: function() {
         main_menu.hide();
         module.mzk.show(false);
@@ -366,14 +366,73 @@ try {
       }
     };
     CommentsListController.prototype.scrollBottom = function() {
+      var self = this;
       var elem = document.querySelector(this.targetSelector);
       elem.scrollTop = elem.scrollTop + 10;
       state.commentsList.scrollTop.set(elem.scrollTop);
+      setTimeout(function() {
+        self.debounceHideInvisibleContent();
+      }, 0);
     };
     CommentsListController.prototype.scrollTop = function() {
+      var self = this;
       var elem = document.querySelector(this.targetSelector);
       elem.scrollTop = elem.scrollTop - 10;
       state.commentsList.scrollTop.set(elem.scrollTop);
+      setTimeout(function() {
+        self.debounceHideInvisibleContent();
+      }, 0);
+    };
+
+    CommentsListController.prototype.debounceHideInvisibleContent = function debounceHideInvisibleContent() {
+      var self = this;
+      var dn = Date.now();
+      var lastCallTime =
+        typeof debounceHideInvisibleContent.lastCallTime !== "undefined"
+          ? debounceHideInvisibleContent.lastCallTime
+          : 0;
+      if (lastCallTime + 100 < dn) {
+        debounceHideInvisibleContent.lastCallTime = dn;
+        self.hideInvisibleContent();
+      }
+    };
+
+    CommentsListController.prototype.hideInvisibleContent = function hideInvisibleContent() {
+      var self = this;
+
+      var wrap = document.querySelector(".vk_mzk_CommentsList");
+      [].slice
+        .call(
+          document.querySelectorAll(
+            ".vk_mzk_CommentsList > div > div > .vk_mzk_comment"
+          )
+        )
+        .forEach(function(elem) {
+          if (typeof elem._innerHTML === "undefined") {
+            elem._innerHTML = elem.innerHTML;
+          }
+          if (self.isCommentElemInVisibleZone(wrap, elem)) {
+            elem.innerHTML !== elem._innerHTML
+              ? (elem.innerHTML = elem._innerHTML)
+              : elem.innerHTML;
+          } else {
+            elem.innerHTML !== "" ? (elem.innerHTML = "") : "";
+          }
+        });
+    };
+
+    CommentsListController.prototype.isCommentElemInVisibleZone = function(
+      wrap,
+      elem
+    ) {
+      var status = true;
+      if (
+        elem.offsetTop > wrap.scrollTop + 5000 ||
+        elem.offsetTop < wrap.scrollTop - 5000
+      ) {
+        status = false;
+      }
+      return status;
     };
     CommentsListController.prototype.back = function(event) {
       state.bottomButton.set(["Читать", "Открыть", "Комментарии", "Озвучить"]);
@@ -441,6 +500,7 @@ try {
     };
 
     PostController.prototype.openComments = function() {
+      state.commentsList.list.set(undefined);
       state.route.set("/commentsList");
       module.mzk.header_path.innerText = module.mzk.header_path.innerText.replace(
         /\/.*/,
@@ -456,6 +516,9 @@ try {
       function then(result) {
         state.commentsList.users.set(result.response.users);
         state.commentsList.list.set(result.response.items);
+        setTimeout(function() {
+          new CommentsListController().debounceHideInvisibleContent();
+        }, 100);
       }
     };
 
@@ -1009,12 +1072,42 @@ try {
         this.subscribe(state.commentsList.list);
         this.subscribe(state.commentsList.focusIndex);
         this.subscribe(state.commentsList.attachmentsFocus);
-        var list = state.commentsList.list.get().map(function(item) {
+
+        var list = state.commentsList.list.get();
+
+        var emptyText;
+
+        if (typeof list === "undefined") {
+          emptyText = "Идет загрузка";
+          list = [];
+        } else {
+          emptyText = "Нет комментариев";
+        }
+
+        list = list.map(function(item) {
           var wrap = createElement("div");
           var comment = new CommentsList_comment(item);
           comment.render(wrap);
           return wrap;
         });
+
+        if (list.length === 0) {
+          list = [
+            createElement(
+              "p",
+              undefined,
+              {
+                fontSize: "25px",
+                color: "#fff",
+                position: "relative",
+                top: "50px",
+                left: "50px"
+              },
+              undefined,
+              emptyText
+            )
+          ];
+        }
 
         var height;
         var left;
@@ -1037,6 +1130,7 @@ try {
         }
         var style = {
           overflowY: "scroll",
+          overflowX: "hidden",
           margin: "20px",
           top: "70px",
           height: height,
@@ -1092,7 +1186,7 @@ try {
 
         var elem = createElement(
           "div",
-          "vk_mzk_post_" + item.id,
+          "vk_mzk_comment vk_mzk_post_" + item.id,
           {
             padding: padding,
             margin: "20px",
@@ -2251,6 +2345,11 @@ try {
         this.hide = function() {
           this.superclass.hide.call(this);
           this.infoContainer.innerHTML = "";
+          try {
+            stb.Stop();
+          } catch (e) {
+            console.log(e);
+          }
         };
         this.bind = function() {
           (function() {
