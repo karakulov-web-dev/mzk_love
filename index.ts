@@ -363,7 +363,7 @@ class Api {
       if (item.text) {
         axios
           .post("http://212.77.128.203:8081/getSpeech", {
-            text: item.text
+            text: specialSpeechTextProccessing(item.text)
           })
           .then(() => {
             recurse(items);
@@ -394,6 +394,16 @@ class Api {
       }&owner_id=-11504106&count=100` + offset
     );
   }
+}
+
+function specialSpeechTextProccessing(string: string) {
+  return string
+    .replace(/#/g, " хештег ")
+    .replace(/_/g, " ")
+    .replace(/(https|http):\/\/.*[$|\s]/g, "")
+    .replace(/\[(id|club).*]/g, function(s) {
+      return s.replace(/\[|\]|\||(id\d*)|(club\d*)/g, "");
+    });
 }
 
 let api = new Api();

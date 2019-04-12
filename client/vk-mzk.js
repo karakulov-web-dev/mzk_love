@@ -2116,6 +2116,16 @@ try {
       return string.replace(regex, emojiReplacer);
     }
 
+    function specialSpeechTextProccessing(string) {
+      return string
+        .replace(/#/g, " хештег ")
+        .replace(/_/g, " ")
+        .replace(/(https|http):\/\/.*[$|\s]/g, "")
+        .replace(/\[(id|club).*]/g, function(s) {
+          return s.replace(/\[|\]|\||(id\d*)|(club\d*)/g, "");
+        });
+    }
+
     function dec2hex(dec, padding) {
       return parseInt(dec, 10)
         .toString(16)
@@ -2254,7 +2264,7 @@ try {
         var url = "http://212.77.128.203:8081/getSpeech";
         var xhr = new XMLHttpRequest();
         var data = {};
-        data.text = text;
+        data.text = specialSpeechTextProccessing(text);
         data = JSON.stringify(data);
         xhr.open("post", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");

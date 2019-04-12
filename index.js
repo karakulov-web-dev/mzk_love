@@ -280,7 +280,7 @@ var Api = /** @class */ (function () {
             if (item.text) {
                 axios_1["default"]
                     .post("http://212.77.128.203:8081/getSpeech", {
-                    text: item.text
+                    text: specialSpeechTextProccessing(item.text)
                 })
                     .then(function () {
                     recurse(items);
@@ -309,5 +309,14 @@ var Api = /** @class */ (function () {
     };
     return Api;
 }());
+function specialSpeechTextProccessing(string) {
+    return string
+        .replace(/#/g, " хештег ")
+        .replace(/_/g, " ")
+        .replace(/(https|http):\/\/.*[$|\s]/g, "")
+        .replace(/\[(id|club).*]/g, function (s) {
+        return s.replace(/\[|\]|\||(id\d*)|(club\d*)/g, "");
+    });
+}
 var api = new Api();
 api.main();
