@@ -2120,7 +2120,7 @@ try {
       return string
         .replace(/#/g, " хештег ")
         .replace(/_/g, " ")
-        .replace(/(https|http):\/\/.*[$|\s]/g, "")
+        .replace(/(https|http):\/\/.*($|\s)/g, "")
         .replace(/\[(id|club).*]/g, function(s) {
           return s.replace(/\[|\]|\||(id\d*)|(club\d*)/g, "");
         });
