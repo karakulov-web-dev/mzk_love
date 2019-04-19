@@ -591,8 +591,27 @@ try {
       var index = state.wall.focusIndex.get();
       var list = state.wall.postList.get();
       var focusItem = list[index];
+      if (!focusItem.text) {
+        return false;
+      }
       HTTP.speechGet(focusItem.text, then);
       function then(result) {
+        var backupFunc = stbEvent.onEvent;
+        stbEvent.onEvent = function(data) {
+          switch (data) {
+            case 1:
+              stb.Stop();
+              stbEvent.onEvent = backupFunc;
+              break;
+            case 5:
+              stb.Stop();
+              stbEvent.onEvent = backupFunc;
+              break;
+            case 4:
+              stbEvent.onEvent = backupFunc;
+              break;
+          }
+        };
         stb.Play(result.url);
       }
     };
@@ -661,9 +680,7 @@ try {
       }
       state.wall.attachmentsFocus.value = 0;
       state.wall.focusIndex.set(index + 1);
-      var elem = document.querySelector(".vk_mzk_post_" + list[index + 1].id);
-      document.querySelector(".vk_mzk_PostList").scrollTop = elem.offsetTop;
-      state.wall.scrollTop.set(elem.offsetTop);
+      state.wall.scrollTop.set((100 / list.length) * index + 1);
     };
     PostController.prototype.prev = function() {
       var index = state.wall.focusIndex.get();
@@ -673,9 +690,7 @@ try {
       }
       state.wall.attachmentsFocus.value = 0;
       state.wall.focusIndex.set(index - 1);
-      var elem = document.querySelector(".vk_mzk_post_" + list[index - 1].id);
-      document.querySelector(".vk_mzk_PostList").scrollTop = elem.offsetTop;
-      state.wall.scrollTop.set(elem.offsetTop);
+      state.wall.scrollTop.set((100 / list.length) * index - 1);
     };
 
     PostController.prototype.attachmentNextFocus = function() {
@@ -794,12 +809,15 @@ try {
               div.appendChild(postListWrap);
               div.appendChild(verticalScrollWrap);
               var postList = new PostList();
-              var verticalScroll = new VerticalScroll(
-                state.wall.scrollTop,
-                ".vk_mzk_PostList"
-              );
-              postList.render(postListWrap);
-              verticalScroll.render(verticalScrollWrap);
+              try {
+                var verticalScroll = new VerticalScrollSimple(
+                  state.wall.scrollTop
+                );
+                postList.render(postListWrap);
+                verticalScroll.render(verticalScrollWrap);
+              } catch (e) {
+                console.log(e);
+              }
             })();
             break;
           case "/textView":
@@ -1293,11 +1311,11 @@ try {
             }
           }
           var wrap = document.createElement("div");
-          if (i > state.wall.focusIndex.get() + 5) {
+          if (i > state.wall.focusIndex.get() + 1) {
             i++;
             return wrap;
           }
-          if (i < state.wall.focusIndex.get() - 5) {
+          if (i < state.wall.focusIndex.get()) {
             i++;
             return wrap;
           }
@@ -1327,7 +1345,7 @@ try {
           left = "10px";
         }
         var style = {
-          overflowY: "scroll",
+          overflowY: "hidden",
           margin: "0px",
           top: "70px",
           height: height,
@@ -1431,6 +1449,62 @@ try {
       };
     }
     VerticalScroll.prototype = baseComponent;
+
+    function VerticalScrollSimple(scrollTopState) {
+      this.scrollTopState = scrollTopState;
+      this.create = function create() {
+        this.subscribe(this.scrollTopState);
+        var h = "550px";
+        if (screen.width < 1000) {
+          h = "415px";
+        }
+        this.h = h;
+        return createElement("div", "mb_scroll", this.getStyle(), [
+          createElement(
+            "div",
+            "mb_scroll_t",
+            {
+              height: h,
+              background:
+                "url(template/" +
+                loader.template +
+                "/i_720/mb_scroll_bg_long.png)"
+            },
+            [
+              createElement("div", "mb_scroll_c", {
+                top: this.getScrolPosition() + "px"
+              })
+            ]
+          ),
+          createElement("div", "mb_scroll_b")
+        ]);
+      };
+      this.getStyle = function() {
+        var right;
+        if (screen.width >= 1000 && stb.mac.substring(0, 8) == "10:27:BE") {
+          right = "0px";
+        } else if (screen.width >= 1000) {
+          right = "20px";
+        } else if (
+          screen.width < 1000 &&
+          stb.mac.substring(0, 8) == "10:27:BE"
+        ) {
+          right = "17px";
+        } else if (screen.width < 1000) {
+          right = "17px";
+        }
+
+        return {
+          position: "absolute",
+          right: right,
+          top: "85px"
+        };
+      };
+      this.getScrolPosition = function() {
+        return (parseInt(this.h) / 100) * this.scrollTopState.get();
+      };
+    }
+    VerticalScrollSimple.prototype = baseComponent;
 
     function HorizontalScroll(scrollState, scrollableElemSelector) {
       this.scrollState = scrollState;
