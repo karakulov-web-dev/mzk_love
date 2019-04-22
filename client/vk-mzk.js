@@ -27,7 +27,7 @@ try {
       setTimeout(function() {
         self._failed();
       }, 7000);
-      var url = "http://google.com";
+      var url = "http://stb-check-internet.rikt.ru/check_internet/test.txt";
       var xmlhttp = new XMLHttpRequest();
       xmlhttp.open("GET", url, true);
       xmlhttp.send();

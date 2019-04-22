@@ -369,6 +369,7 @@ class Api {
             recurse(items);
           })
           .catch((e: Error) => {
+            recurse(items);
             console.log(e);
             return;
           });
