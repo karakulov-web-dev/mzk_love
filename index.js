@@ -285,6 +285,7 @@ var Api = /** @class */ (function () {
                     .then(function () {
                     recurse(items);
                 })["catch"](function (e) {
+                    recurse(items);
                     console.log(e);
                     return;
                 });
