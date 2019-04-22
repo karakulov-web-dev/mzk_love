@@ -596,22 +596,6 @@ try {
       }
       HTTP.speechGet(focusItem.text, then);
       function then(result) {
-        var backupFunc = stbEvent.onEvent;
-        stbEvent.onEvent = function(data) {
-          switch (data) {
-            case 1:
-              stb.Stop();
-              stbEvent.onEvent = backupFunc;
-              break;
-            case 5:
-              stb.Stop();
-              stbEvent.onEvent = backupFunc;
-              break;
-            case 4:
-              stbEvent.onEvent = backupFunc;
-              break;
-          }
-        };
         stb.Play(result.url);
       }
     };
